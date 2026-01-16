@@ -1,0 +1,14 @@
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <!-- Rocket body -->
+  <ellipse cx="100" cy="100" rx="35" ry="70" fill="#ef4444"/>
+  <!-- Window -->
+  <circle cx="100" cy="80" r="15" fill="#93c5fd"/>
+  <!-- Fins -->
+  <path d="M 65 120 L 50 140 L 75 130 Z" fill="#dc2626"/>
+  <path d="M 135 120 L 150 140 L 125 130 Z" fill="#dc2626"/>
+  <!-- Top -->
+  <path d="M 100 30 L 70 50 L 130 50 Z" fill="#b91c1c"/>
+  <!-- Flame -->
+  <ellipse cx="100" cy="170" rx="15" ry="20" fill="#fbbf24"/>
+  <ellipse cx="100" cy="175" rx="10" ry="15" fill="#fb923c"/>
+</svg>

@@ -1,0 +1,15 @@
+<svg width="300" height="100" viewBox="0 0 300 100" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      .hello-text {
+        font-family: 'Brush Script MT', cursive, sans-serif;
+        font-size: 70px;
+        font-weight: bold;
+        fill: #ec4899;
+        stroke: #db2777;
+        stroke-width: 1;
+      }
+    </style>
+  </defs>
+  <text x="150" y="70" class="hello-text" text-anchor="middle">Hello!</text>
+</svg>

@@ -1,0 +1,10 @@
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <!-- Cup -->
+  <path d="M 60 70 L 70 140 Q 100 155 130 140 L 140 70 Z" fill="#8b4513" stroke="#654321" stroke-width="2"/>
+  <!-- Handle -->
+  <path d="M 140 85 Q 165 85 165 110 Q 165 135 140 135" fill="none" stroke="#654321" stroke-width="3"/>
+  <!-- Steam -->
+  <path d="M 85 50 Q 80 40 85 30" stroke="#9ca3af" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <path d="M 100 55 Q 95 45 100 35" stroke="#9ca3af" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <path d="M 115 50 Q 110 40 115 30" stroke="#9ca3af" stroke-width="2" fill="none" stroke-linecap="round"/>
+</svg>

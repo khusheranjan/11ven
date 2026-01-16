@@ -1,0 +1,13 @@
+<svg width="200" height="240" viewBox="0 0 200 240" xmlns="http://www.w3.org/2000/svg">
+  <!-- Avocado body -->
+  <ellipse cx="100" cy="130" rx="70" ry="90" fill="#d4e09b"/>
+  <!-- Seed -->
+  <ellipse cx="100" cy="140" rx="35" ry="45" fill="#a0522d"/>
+  <!-- Face -->
+  <circle cx="85" cy="110" r="5" fill="#5a4a2a"/>
+  <circle cx="115" cy="110" r="5" fill="#5a4a2a"/>
+  <path d="M 90 125 Q 100 130 110 125" stroke="#5a4a2a" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <!-- Stem/Leaf -->
+  <rect x="95" y="30" width="10" height="15" fill="#7c5c4a" rx="2"/>
+  <ellipse cx="120" cy="25" rx="25" ry="15" fill="#6b8e23" transform="rotate(-30 120 25)"/>
+</svg>
