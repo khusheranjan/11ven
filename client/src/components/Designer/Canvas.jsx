@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, forwardRef, useImperativeHandle } from 'react';
+import { useEffect, useRef, forwardRef, useImperativeHandle } from 'react';
 import * as fabric from 'fabric';
 
 const TSHIRT_COLORS = [
@@ -12,22 +12,76 @@ const TSHIRT_COLORS = [
   { name: 'Pink', value: '#ec4899', hex: '#EC4899', frontImage: '/tshirt-pink-front.png', backImage: '/tshirt-pink-back.png' },
 ];
 
-const Canvas = forwardRef(({ onCanvasReady, tshirtColor, setTshirtColor, onSelectionChange, side: externalSide, onSideChange, hideControls = false }, ref) => {
+const Canvas = forwardRef(({ onCanvasReady, tshirtColor, onSelectionChange, side = 'front', zoomLevel = 1 }, ref) => {
   const canvasRef = useRef(null);
   const fabricRef = useRef(null);
-  const [internalSide, setInternalSide] = useState('front');
-  const [frontDesign, setFrontDesign] = useState(null);
-  const [backDesign, setBackDesign] = useState(null);
+  const frontDesignRef = useRef(null);
+  const backDesignRef = useRef(null);
+  const previousSideRef = useRef('front');
 
-  // Use external side if provided, otherwise use internal
-  const side = externalSide !== undefined ? externalSide : internalSide;
-  const setSide = onSideChange || setInternalSide;
+  // Save current canvas state to the appropriate side ref
+  const saveCurrentSide = (currentSide) => {
+    if (!fabricRef.current) return;
+    const json = fabricRef.current.toJSON();
+    if (currentSide === 'front') {
+      frontDesignRef.current = json;
+    } else {
+      backDesignRef.current = json;
+    }
+  };
+
+  // Load design for the specified side
+  const loadSideDesign = (targetSide) => {
+    if (!fabricRef.current) return;
+
+    const designToLoad = targetSide === 'front' ? frontDesignRef.current : backDesignRef.current;
+
+    // Clear canvas first
+    fabricRef.current.clear();
+    fabricRef.current.backgroundColor = 'transparent';
+
+    if (designToLoad) {
+      fabricRef.current.loadFromJSON(designToLoad).then(() => {
+        fabricRef.current.renderAll();
+      });
+    }
+  };
+
+  // Watch for side changes from external prop
+  useEffect(() => {
+    if (!fabricRef.current) return;
+
+    const prevSide = previousSideRef.current;
+
+    if (prevSide !== side) {
+      // Save the design from the previous side
+      saveCurrentSide(prevSide);
+
+      // Load the design for the new side
+      loadSideDesign(side);
+
+      // Update previous side ref
+      previousSideRef.current = side;
+
+      // Clear selection when switching sides
+      if (onSelectionChange) {
+        onSelectionChange(null);
+      }
+    }
+  }, [side]);
 
   useImperativeHandle(ref, () => ({
     addImage: (url) => {
       if (!fabricRef.current) return;
       fabric.FabricImage.fromURL(url, { crossOrigin: 'anonymous' }).then((img) => {
         img.scaleToWidth(150);
+        // Position at canvas center
+        img.set({
+          left: 200,
+          top: 250,
+          originX: 'center',
+          originY: 'center'
+        });
         fabricRef.current.add(img);
         fabricRef.current.setActiveObject(img);
         fabricRef.current.renderAll();
@@ -36,12 +90,14 @@ const Canvas = forwardRef(({ onCanvasReady, tshirtColor, setTshirtColor, onSelec
     addText: (text) => {
       if (!fabricRef.current) return;
       const textObj = new fabric.IText(text, {
-        left: 100,
-        top: 100,
+        left: 200,
+        top: 250,
         fontSize: 32,
         fill: tshirtColor === '#ffffff' ? '#000000' : '#ffffff',
         fontFamily: 'Arial',
-        fontWeight: 'bold'
+        fontWeight: 'bold',
+        originX: 'center',
+        originY: 'center'
       });
       fabricRef.current.add(textObj);
       fabricRef.current.setActiveObject(textObj);
@@ -58,22 +114,27 @@ const Canvas = forwardRef(({ onCanvasReady, tshirtColor, setTshirtColor, onSelec
     getCanvasJSON: () => {
       if (!fabricRef.current) return null;
       // Save current canvas state before exporting
-      saveCurrentSide();
+      saveCurrentSide(side);
       return {
-        front: frontDesign || fabricRef.current.toJSON(),
-        back: backDesign
+        front: frontDesignRef.current || fabricRef.current.toJSON(),
+        back: backDesignRef.current
       };
     },
     loadFromJSON: (json) => {
       if (!fabricRef.current || !json) return;
       if (json.front) {
-        setFrontDesign(json.front);
-        setBackDesign(json.back || null);
-        fabricRef.current.loadFromJSON(json.front).then(() => {
-          fabricRef.current.renderAll();
-        });
+        frontDesignRef.current = json.front;
+        backDesignRef.current = json.back || null;
+        // Load the current side's design
+        const designToLoad = side === 'front' ? json.front : json.back;
+        if (designToLoad) {
+          fabricRef.current.loadFromJSON(designToLoad).then(() => {
+            fabricRef.current.renderAll();
+          });
+        }
       } else {
-        // Backward compatibility
+        // Backward compatibility - load as front design
+        frontDesignRef.current = json;
         fabricRef.current.loadFromJSON(json).then(() => {
           fabricRef.current.renderAll();
         });
@@ -91,42 +152,63 @@ const Canvas = forwardRef(({ onCanvasReady, tshirtColor, setTshirtColor, onSelec
         multiplier: 3
       });
     },
-    getCanvas: () => fabricRef.current
+    getCanvas: () => fabricRef.current,
+    getCurrentSide: () => side,
+    getFrontDesign: () => frontDesignRef.current,
+    getBackDesign: () => backDesignRef.current,
+    // Export mockup for a specific side
+    exportSideMockup: async (targetSide) => {
+      if (!fabricRef.current) return null;
+
+      // Save current state
+      const currentSideDesign = fabricRef.current.toJSON();
+
+      // If requesting current side, just export
+      if (targetSide === side) {
+        return fabricRef.current.toDataURL({ format: 'png', quality: 1 });
+      }
+
+      // Otherwise, we need to load the other side's design, export, then restore
+      const designToLoad = targetSide === 'front' ? frontDesignRef.current : backDesignRef.current;
+
+      if (!designToLoad || !designToLoad.objects || designToLoad.objects.length === 0) {
+        return null; // No design on that side
+      }
+
+      // Load the target side design
+      await fabricRef.current.loadFromJSON(designToLoad);
+      fabricRef.current.renderAll();
+
+      // Export
+      const mockup = fabricRef.current.toDataURL({ format: 'png', quality: 1 });
+
+      // Restore current side
+      await fabricRef.current.loadFromJSON(currentSideDesign);
+      fabricRef.current.renderAll();
+
+      return mockup;
+    },
+    // Check if there's content on a specific side
+    hasSideContent: (targetSide) => {
+      const design = targetSide === 'front' ? frontDesignRef.current : backDesignRef.current;
+
+      // If checking current side, check canvas directly
+      if (targetSide === side && fabricRef.current) {
+        return fabricRef.current.getObjects().length > 0;
+      }
+
+      return design && design.objects && design.objects.length > 0;
+    },
+    // Check if design has content on back
+    hasBackContent: () => {
+      // If currently on back, check canvas
+      if (side === 'back' && fabricRef.current) {
+        return fabricRef.current.getObjects().length > 0;
+      }
+      // Otherwise check saved back design
+      return backDesignRef.current && backDesignRef.current.objects && backDesignRef.current.objects.length > 0;
+    }
   }));
-
-  // Save current canvas state when switching sides
-  const saveCurrentSide = () => {
-    if (!fabricRef.current) return;
-    const json = fabricRef.current.toJSON();
-    if (side === 'front') {
-      setFrontDesign(json);
-    } else {
-      setBackDesign(json);
-    }
-  };
-
-  // Load design when switching sides
-  const handleSideChange = (newSide) => {
-    if (newSide === side) return;
-
-    // Save current side's design
-    saveCurrentSide();
-
-    // Switch side
-    setSide(newSide);
-
-    // Load the other side's design
-    const designToLoad = newSide === 'front' ? frontDesign : backDesign;
-    if (designToLoad && fabricRef.current) {
-      fabricRef.current.loadFromJSON(designToLoad).then(() => {
-        fabricRef.current.renderAll();
-      });
-    } else if (fabricRef.current) {
-      // Clear canvas if no design exists for this side
-      fabricRef.current.clear();
-      fabricRef.current.backgroundColor = 'transparent';
-    }
-  };
 
   useEffect(() => {
     if (canvasRef.current && !fabricRef.current) {
@@ -136,22 +218,24 @@ const Canvas = forwardRef(({ onCanvasReady, tshirtColor, setTshirtColor, onSelec
         backgroundColor: 'transparent',
         preserveObjectStacking: true,
         // Modern selection styling
-        selectionColor: 'rgba(59, 130, 246, 0.1)',
-        selectionBorderColor: '#3b82f6',
+        selectionColor: 'rgba(220, 38, 38, 0.1)',
+        selectionBorderColor: '#dc2626',
         selectionLineWidth: 1
       });
 
       // Customize default control styling for all objects
       fabric.Object.prototype.set({
         transparentCorners: false,
-        cornerColor: '#3b82f6',
+        cornerColor: '#dc2626',
         cornerStrokeColor: '#ffffff',
-        cornerSize: 8,
-        cornerStyle: 'circle',
-        borderColor: '#3b82f6',
-        borderScaleFactor: 1.5,
+        cornerSize: 6,
+        borderColor: '#dc2626',
+        borderScaleFactor: 1,
         padding: 8,
-        borderDashArray: [4, 4]
+        borderDashArray: [4, 4],
+        centeredRotation: true,
+        originX: 'center',
+        originY: 'center'
       });
 
       // Add selection change handler
@@ -205,7 +289,7 @@ const Canvas = forwardRef(({ onCanvasReady, tshirtColor, setTshirtColor, onSelec
   return (
     <div className="flex flex-col items-center w-full">
       {/* Canvas with T-shirt mockup */}
-      <div className="relative bg-gradient-to-br from-gray-100 via-gray-50 to-white rounded-2xl shadow-2xl p-10">
+      <div className="relative bg-gradient-to-br from-gray-100 via-gray-50 to-white rounded-2xl shadow-2xl p-10 origin-center transition-transform" style={{ transform: `scale(${zoomLevel})` }}>
         <div className="relative w-[400px] h-[500px] flex items-center justify-center">
           {/* T-shirt Image Mockup */}
           <div

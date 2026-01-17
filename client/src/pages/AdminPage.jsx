@@ -21,17 +21,17 @@ export default function AdminPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 py-8">
+    <div className="min-h-screen bg-white py-8">
       <div className="max-w-7xl mx-auto px-4">
-        <h1 className="text-2xl font-bold text-gray-900 mb-6">Admin Dashboard</h1>
+        <h1 className="text-2xl font-bold text-black mb-6">Admin Dashboard</h1>
 
         {/* Tabs */}
-        <div className="mb-6 border-b">
+        <div className="mb-6 border-b border-gray-200">
           <button
             onClick={() => setActiveTab('orders')}
             className={`px-6 py-3 font-medium ${
               activeTab === 'orders'
-                ? 'border-b-2 border-indigo-600 text-indigo-600'
+                ? 'border-b-2 border-black text-black'
                 : 'text-gray-500 hover:text-gray-700'
             }`}
           >
@@ -41,7 +41,7 @@ export default function AdminPage() {
             onClick={() => setActiveTab('assets')}
             className={`px-6 py-3 font-medium ${
               activeTab === 'assets'
-                ? 'border-b-2 border-indigo-600 text-indigo-600'
+                ? 'border-b-2 border-black text-black'
                 : 'text-gray-500 hover:text-gray-700'
             }`}
           >
@@ -50,7 +50,7 @@ export default function AdminPage() {
         </div>
 
         {/* Content */}
-        <div className="bg-white rounded-lg shadow p-6">
+        <div className="bg-gray-50 rounded-lg border border-gray-200 p-6">
           {activeTab === 'orders' && <OrderManager />}
           {activeTab === 'assets' && <AssetManager />}
         </div>

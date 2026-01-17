@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { RotateCw, Move, Palette, Maximize2, Type, Trash2, Copy, FlipHorizontal, FlipVertical, Lock, Unlock } from 'lucide-react';
+import { RotateCw, Move, Palette, Maximize2, Type, Trash2, Copy, FlipHorizontal, FlipVertical, Lock, Unlock, ZoomIn, ZoomOut, Maximize, Eye } from 'lucide-react';
 
-export default function PropertiesPanel({ selectedObject, canvasRef, onDelete }) {
+export default function PropertiesPanel({ selectedObject, canvasRef, onDelete, onZoomIn, onZoomOut, onFullscreen }) {
   const [properties, setProperties] = useState({
     x: 0,
     y: 0,
@@ -133,17 +133,82 @@ export default function PropertiesPanel({ selectedObject, canvasRef, onDelete })
 
   if (!selectedObject) {
     return (
-      <div className="w-64 bg-white/80 backdrop-blur-sm border-l border-gray-100 h-full flex flex-col">
-        <div className="p-4 border-b border-gray-100">
-          <h3 className="text-sm font-semibold text-gray-400">Properties</h3>
+      <div className="w-64 bg-white border-l border-gray-200 h-full flex flex-col">
+        <div className="p-4 border-b border-gray-200">
+          <h3 className="text-sm font-semibold text-gray-900">Properties</h3>
         </div>
-        <div className="flex-1 flex items-center justify-center p-6">
-          <div className="text-center">
-            <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-3">
-              <Move className="w-5 h-5 text-gray-400" />
+        <div className="flex-1 overflow-y-auto custom-scrollbar">
+          {/* Canvas Controls */}
+          <div className="p-4 space-y-2">
+            <button
+              onClick={onFullscreen}
+              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-white rounded-lg border border-gray-300 hover:bg-gray-50 text-gray-700 font-medium transition-all"
+              title="Fullscreen"
+            >
+              <Maximize className="w-4 h-4" />
+              <span>Fullscreen</span>
+            </button>
+            <button
+              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-black rounded-lg text-white font-medium transition-all hover:bg-gray-800"
+              title="Preview"
+            >
+              <Eye className="w-4 h-4" />
+              <span>Preview</span>
+            </button>
+          </div>
+          {/* Tips Section */}
+          <div className="p-4 border-b border-gray-200">
+            <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Quick Tips</h4>
+            <div className="space-y-3">
+              <div className="flex items-start gap-3 text-xs text-gray-600">
+                <div className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <span className="text-gray-700 font-bold">1</span>
+                </div>
+                <p>Click on any element on the canvas to select and edit it</p>
+              </div>
+              <div className="flex items-start gap-3 text-xs text-gray-600">
+                <div className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <span className="text-gray-700 font-bold">2</span>
+                </div>
+                <p>Drag corners to resize, use rotation handle to rotate</p>
+              </div>
+              <div className="flex items-start gap-3 text-xs text-gray-600">
+                <div className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <span className="text-gray-700 font-bold">3</span>
+                </div>
+                <p>Double-click text to edit directly on canvas</p>
+              </div>
             </div>
-            <p className="text-sm text-gray-500 font-medium">No Selection</p>
-            <p className="text-xs text-gray-400 mt-1">Select an element to edit</p>
+          </div>
+
+          {/* Keyboard Shortcuts */}
+          <div className="p-4 border-b border-gray-200">
+            <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Shortcuts</h4>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-gray-600">Delete element</span>
+                <kbd className="px-2 py-1 bg-gray-200 rounded text-gray-700 font-mono text-[10px]">Delete</kbd>
+              </div>
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-gray-600">Deselect</span>
+                <kbd className="px-2 py-1 bg-gray-200 rounded text-gray-700 font-mono text-[10px]">Esc</kbd>
+              </div>
+            </div>
+          </div>
+
+          {/* Design Info */}
+          <div className="p-4">
+            <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Canvas Info</h4>
+            <div className="space-y-2 text-xs text-gray-600">
+              <div className="flex justify-between">
+                <span>Print Area</span>
+                <span className="text-gray-900">400 × 500 px</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Recommended DPI</span>
+                <span className="text-gray-900">300</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -153,21 +218,21 @@ export default function PropertiesPanel({ selectedObject, canvasRef, onDelete })
   const isText = selectedObject.type === 'i-text' || selectedObject.type === 'text';
 
   return (
-    <div className="w-64 bg-white/95 backdrop-blur-sm border-l border-gray-100 h-full flex flex-col overflow-hidden">
+    <div className="w-64 bg-white border-l border-gray-200 h-full flex flex-col overflow-hidden">
       {/* Header */}
-      <div className="p-4 border-b border-gray-100 flex items-center justify-between">
+      <div className="p-4 border-b border-gray-200 flex items-center justify-between">
         <div className="flex items-center gap-2">
           {isText ? (
-            <Type className="w-4 h-4 text-blue-500" />
+            <Type className="w-4 h-4 text-black" />
           ) : (
-            <Maximize2 className="w-4 h-4 text-blue-500" />
+            <Maximize2 className="w-4 h-4 text-black" />
           )}
           <h3 className="text-sm font-semibold text-gray-900">{getObjectType()}</h3>
         </div>
         <div className="flex items-center gap-1">
           <button
             onClick={handleLock}
-            className={`p-1.5 rounded-md transition-colors ${properties.locked ? 'bg-amber-100 text-amber-600' : 'hover:bg-gray-100 text-gray-400'}`}
+            className={`p-1.5 rounded-md transition-colors ${properties.locked ? 'bg-yellow-100 text-yellow-600' : 'hover:bg-gray-100 text-gray-400'}`}
             title={properties.locked ? 'Unlock' : 'Lock'}
           >
             {properties.locked ? <Lock className="w-3.5 h-3.5" /> : <Unlock className="w-3.5 h-3.5" />}
@@ -178,11 +243,11 @@ export default function PropertiesPanel({ selectedObject, canvasRef, onDelete })
       {/* Scrollable Content */}
       <div className="flex-1 overflow-y-auto custom-scrollbar">
         {/* Quick Actions */}
-        <div className="p-4 border-b border-gray-100">
+        <div className="p-4 border-b border-gray-200">
           <div className="flex items-center gap-2">
             <button
               onClick={handleDuplicate}
-              className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-gray-50 hover:bg-gray-100 rounded-lg text-xs font-medium text-gray-700 transition-colors"
+              className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-xs font-medium text-gray-700 transition-colors"
             >
               <Copy className="w-3.5 h-3.5" />
               Duplicate
@@ -198,7 +263,7 @@ export default function PropertiesPanel({ selectedObject, canvasRef, onDelete })
         </div>
 
         {/* Transform Section */}
-        <div className="p-4 border-b border-gray-100">
+        <div className="p-4 border-b border-gray-200">
           <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Transform</h4>
 
           {/* Position */}
@@ -209,7 +274,7 @@ export default function PropertiesPanel({ selectedObject, canvasRef, onDelete })
                 type="number"
                 value={properties.x}
                 onChange={(e) => updateObject('left', parseInt(e.target.value) || 0)}
-                className="w-full px-2 py-1.5 text-xs border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-2 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-black focus:border-black"
               />
             </div>
             <div>
@@ -218,7 +283,7 @@ export default function PropertiesPanel({ selectedObject, canvasRef, onDelete })
                 type="number"
                 value={properties.y}
                 onChange={(e) => updateObject('top', parseInt(e.target.value) || 0)}
-                className="w-full px-2 py-1.5 text-xs border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-2 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-black focus:border-black"
               />
             </div>
           </div>
@@ -235,7 +300,7 @@ export default function PropertiesPanel({ selectedObject, canvasRef, onDelete })
                   const scale = newWidth / (selectedObject.width || 1);
                   updateObject('scaleX', scale);
                 }}
-                className="w-full px-2 py-1.5 text-xs border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-2 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-black focus:border-black"
               />
             </div>
             <div>
@@ -248,7 +313,7 @@ export default function PropertiesPanel({ selectedObject, canvasRef, onDelete })
                   const scale = newHeight / (selectedObject.height || 1);
                   updateObject('scaleY', scale);
                 }}
-                className="w-full px-2 py-1.5 text-xs border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-2 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-black focus:border-black"
               />
             </div>
           </div>
@@ -260,15 +325,15 @@ export default function PropertiesPanel({ selectedObject, canvasRef, onDelete })
                 <RotateCw className="w-3 h-3" />
                 Rotation
               </label>
-              <span className="text-[10px] text-gray-400">{properties.angle}°</span>
+              <span className="text-[10px] text-gray-400">{selectedObject?.angle?.toFixed(0) || 0}°</span>
             </div>
             <input
               type="range"
               min="0"
               max="360"
-              value={properties.angle}
+              value={selectedObject?.angle || properties.angle}
               onChange={(e) => updateObject('angle', parseInt(e.target.value))}
-              className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-500"
+              className="w-full h-1.5 bg-gray-300 rounded-lg appearance-none cursor-pointer accent-black"
             />
           </div>
 
@@ -277,7 +342,7 @@ export default function PropertiesPanel({ selectedObject, canvasRef, onDelete })
             <button
               onClick={handleFlipH}
               className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-colors ${
-                selectedObject?.flipX ? 'bg-blue-100 text-blue-600' : 'bg-gray-50 hover:bg-gray-100 text-gray-700'
+                selectedObject?.flipX ? 'bg-black text-white' : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
               }`}
             >
               <FlipHorizontal className="w-3.5 h-3.5" />
@@ -286,7 +351,7 @@ export default function PropertiesPanel({ selectedObject, canvasRef, onDelete })
             <button
               onClick={handleFlipV}
               className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-colors ${
-                selectedObject?.flipY ? 'bg-blue-100 text-blue-600' : 'bg-gray-50 hover:bg-gray-100 text-gray-700'
+                selectedObject?.flipY ? 'bg-black text-white' : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
               }`}
             >
               <FlipVertical className="w-3.5 h-3.5" />
@@ -296,7 +361,7 @@ export default function PropertiesPanel({ selectedObject, canvasRef, onDelete })
         </div>
 
         {/* Appearance Section */}
-        <div className="p-4 border-b border-gray-100">
+        <div className="p-4 border-b border-gray-200">
           <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Appearance</h4>
 
           {/* Opacity */}
@@ -312,7 +377,7 @@ export default function PropertiesPanel({ selectedObject, canvasRef, onDelete })
               step="0.01"
               value={properties.opacity}
               onChange={(e) => updateObject('opacity', parseFloat(e.target.value))}
-              className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-500"
+              className="w-full h-1.5 bg-gray-300 rounded-lg appearance-none cursor-pointer accent-black"
             />
           </div>
 
@@ -328,13 +393,13 @@ export default function PropertiesPanel({ selectedObject, canvasRef, onDelete })
                   type="color"
                   value={typeof properties.fill === 'string' ? properties.fill : '#000000'}
                   onChange={(e) => updateObject('fill', e.target.value)}
-                  className="w-8 h-8 rounded-md border border-gray-200 cursor-pointer"
+                  className="w-8 h-8 rounded-md border border-gray-300 cursor-pointer"
                 />
                 <input
                   type="text"
                   value={typeof properties.fill === 'string' ? properties.fill : '#000000'}
                   onChange={(e) => updateObject('fill', e.target.value)}
-                  className="flex-1 px-2 py-1.5 text-xs border border-gray-200 rounded-md font-mono focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  className="flex-1 px-2 py-1.5 text-xs border border-gray-300 rounded-md font-mono focus:outline-none focus:ring-1 focus:ring-black"
                 />
               </div>
             </div>
@@ -342,7 +407,7 @@ export default function PropertiesPanel({ selectedObject, canvasRef, onDelete })
         </div>
 
         {/* Layer Section */}
-        <div className="p-4">
+        <div className="p-4 border-b border-gray-200">
           <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Layer Order</h4>
           <div className="grid grid-cols-4 gap-1.5">
             <button
@@ -353,7 +418,7 @@ export default function PropertiesPanel({ selectedObject, canvasRef, onDelete })
                   canvas.renderAll();
                 }
               }}
-              className="p-2 bg-gray-50 hover:bg-gray-100 rounded-md text-[10px] font-medium text-gray-700 transition-colors"
+              className="p-2 bg-gray-100 hover:bg-gray-200 rounded-md text-[10px] font-medium text-gray-700 transition-colors"
               title="Bring to Front"
             >
               Front
@@ -366,7 +431,7 @@ export default function PropertiesPanel({ selectedObject, canvasRef, onDelete })
                   canvas.renderAll();
                 }
               }}
-              className="p-2 bg-gray-50 hover:bg-gray-100 rounded-md text-[10px] font-medium text-gray-700 transition-colors"
+              className="p-2 bg-gray-100 hover:bg-gray-200 rounded-md text-[10px] font-medium text-gray-700 transition-colors"
               title="Bring Forward"
             >
               Up
@@ -379,7 +444,7 @@ export default function PropertiesPanel({ selectedObject, canvasRef, onDelete })
                   canvas.renderAll();
                 }
               }}
-              className="p-2 bg-gray-50 hover:bg-gray-100 rounded-md text-[10px] font-medium text-gray-700 transition-colors"
+              className="p-2 bg-gray-100 hover:bg-gray-200 rounded-md text-[10px] font-medium text-gray-700 transition-colors"
               title="Send Backward"
             >
               Down
@@ -399,6 +464,51 @@ export default function PropertiesPanel({ selectedObject, canvasRef, onDelete })
             </button>
           </div>
         </div>
+
+        {/* Text Styling Section - Only for text objects */}
+        {isText && (
+          <div className="p-4 border-b border-gray-100">
+            <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Text Settings</h4>
+
+            {/* Letter Spacing */}
+            <div className="mb-4">
+              <label className="block text-[10px] font-medium text-gray-700 mb-2">
+                Letter Spacing: {(selectedObject?.charSpacing || 0) / 10}
+              </label>
+              <input
+                type="range"
+                min="-5"
+                max="50"
+                step="0.5"
+                value={(selectedObject?.charSpacing || 0) / 10}
+                onChange={(e) => {
+                  const spacing = parseFloat(e.target.value);
+                  updateObject('charSpacing', spacing * 10);
+                }}
+                className="w-full"
+              />
+            </div>
+
+            {/* Line Height */}
+            <div className="mb-4">
+              <label className="block text-[10px] font-medium text-gray-700 mb-2">
+                Line Height: {(selectedObject?.lineHeight || 1.2).toFixed(1)}
+              </label>
+              <input
+                type="range"
+                min="0.5"
+                max="3"
+                step="0.1"
+                value={selectedObject?.lineHeight || 1.2}
+                onChange={(e) => {
+                  const height = parseFloat(e.target.value);
+                  updateObject('lineHeight', height);
+                }}
+                className="w-full"
+              />
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

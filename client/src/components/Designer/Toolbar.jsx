@@ -77,14 +77,14 @@ export default function Toolbar({ canvasRef, showOnlyUpload = false, showOnlyTex
             <input
               type="text"
               placeholder="Enter text..."
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent text-sm"
               value={textInput}
               onChange={(e) => setTextInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleAddText()}
             />
             <button
               onClick={handleAddText}
-              className="w-full px-4 py-2.5 bg-blue-500 text-white font-medium rounded-lg hover:bg-blue-600 transition-colors"
+              className="w-full px-4 py-2.5 bg-black text-white font-medium rounded-lg hover:bg-gray-800 transition-colors"
             >
               Add Text
             </button>
@@ -104,7 +104,7 @@ export default function Toolbar({ canvasRef, showOnlyUpload = false, showOnlyTex
           <button
             onClick={() => fileInputRef.current?.click()}
             disabled={uploading}
-            className="w-full px-4 py-8 border-2 border-dashed border-gray-300 rounded-lg text-gray-600 hover:border-blue-500 hover:bg-blue-50 hover:text-blue-600 disabled:opacity-50 transition-all flex flex-col items-center gap-2"
+            className="w-full px-4 py-8 border-2 border-dashed border-gray-300 rounded-lg text-gray-600 hover:border-black hover:bg-gray-50 hover:text-black disabled:opacity-50 transition-all flex flex-col items-center gap-2"
           >
             <svg
               className="w-8 h-8"

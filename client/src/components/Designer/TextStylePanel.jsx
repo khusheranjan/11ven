@@ -76,8 +76,6 @@ const FONT_CATEGORIES = {
 const TEXT_EFFECTS = [
   { id: 'none', name: 'Normal' },
   { id: 'curved', name: 'Curved' },
-  { id: 'arch', name: 'Arch' },
-  { id: 'circle', name: 'Circle' },
   { id: 'shadow', name: 'Shadow' },
   { id: 'outline', name: 'Outline' }
 ];
@@ -145,14 +143,12 @@ export default function TextStylePanel({ canvasRef, selectedObject, tshirtColor 
 
     let textObj;
 
-    if (textEffect === 'curved' || textEffect === 'arch') {
-      textObj = createCurvedText(textInput, textEffect === 'arch');
-    } else if (textEffect === 'circle') {
-      textObj = createCircleText(textInput);
+    if (textEffect === 'curved') {
+      textObj = createCurvedText(textInput, false);
     } else {
       textObj = new fabric.IText(textInput, {
-        left: 100,
-        top: 100,
+        left: 200,
+        top: 250,
         fontSize: fontSize,
         fill: textColor,
         fontFamily: fontFamily,
@@ -160,7 +156,9 @@ export default function TextStylePanel({ canvasRef, selectedObject, tshirtColor 
         fontStyle: fontStyle,
         textAlign: textAlign,
         charSpacing: letterSpacing * 10,
-        lineHeight: lineHeight
+        lineHeight: lineHeight,
+        originX: 'center',
+        originY: 'center'
       });
 
       // Apply effects
@@ -311,7 +309,7 @@ export default function TextStylePanel({ canvasRef, selectedObject, tshirtColor 
           <input
             type="text"
             placeholder="Enter text..."
-            className="flex-1 px-3 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+            className="flex-1 px-3 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent text-sm"
             value={textInput}
             onChange={(e) => setTextInput(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleAddText()}
@@ -319,7 +317,7 @@ export default function TextStylePanel({ canvasRef, selectedObject, tshirtColor 
           <button
             onClick={handleAddText}
             disabled={!textInput.trim()}
-            className="px-4 py-2.5 bg-blue-500 text-white font-medium rounded-lg hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors text-sm whitespace-nowrap"
+            className="px-4 py-2.5 bg-black text-white font-medium rounded-lg hover:bg-gray-800 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors text-sm whitespace-nowrap"
           >
             Add
           </button>
@@ -338,44 +336,30 @@ export default function TextStylePanel({ canvasRef, selectedObject, tshirtColor 
                 onClick={() => setTextEffect(effect.id)}
                 className={`p-3 rounded-lg border-2 text-center transition-all h-20 flex flex-col items-center justify-center ${
                   textEffect === effect.id
-                    ? 'border-blue-500 bg-blue-50'
+                    ? 'border-black bg-gray-50'
                     : 'border-gray-200 hover:border-gray-300'
                 }`}
               >
-                {/* Visual effect preview */}
-                <div className="text-sm font-bold mb-1">
+                {/* Visual effect preview - ABCD with effects */}
+                <div className="text-xs font-bold" style={{ fontSize: '12px', fontFamily }}>
                   {effect.id === 'none' && (
-                    <span>Normal</span>
+                    <span>ABCD</span>
                   )}
                   {effect.id === 'curved' && (
-                    <svg width="50" height="30" viewBox="0 0 50 30">
-                      <path id="curve1" d="M 5 25 Q 25 5 45 25" fill="none" />
-                      <text fontSize="8" fontWeight="bold" fill="currentColor">
-                        <textPath href="#curve1" startOffset="50%" textAnchor="middle">Curved</textPath>
-                      </text>
-                    </svg>
-                  )}
-                  {effect.id === 'arch' && (
-                    <svg width="50" height="30" viewBox="0 0 50 30">
-                      <path id="arch1" d="M 5 25 Q 25 0 45 25" fill="none" />
-                      <text fontSize="8" fontWeight="bold" fill="currentColor">
-                        <textPath href="#arch1" startOffset="50%" textAnchor="middle">Arch</textPath>
-                      </text>
-                    </svg>
-                  )}
-                  {effect.id === 'circle' && (
-                    <svg width="40" height="40" viewBox="0 0 40 40">
-                      <path id="circle1" d="M 20 5 A 15 15 0 1 1 19.99 5" fill="none" />
-                      <text fontSize="6" fontWeight="bold" fill="currentColor">
-                        <textPath href="#circle1" startOffset="0%">Circle</textPath>
+                    <svg width="50" height="25" viewBox="0 0 50 25">
+                      <defs>
+                        <path id="curvepath" d="M 5 20 Q 25 2 45 20" fill="none" />
+                      </defs>
+                      <text fontSize="10" fontWeight="bold" fill="currentColor" fontFamily={fontFamily}>
+                        <textPath href="#curvepath" startOffset="50%" textAnchor="middle">ABCD</textPath>
                       </text>
                     </svg>
                   )}
                   {effect.id === 'shadow' && (
-                    <span style={{ textShadow: '2px 2px 3px rgba(0,0,0,0.4)' }}>Shadow</span>
+                    <span style={{ textShadow: '1px 1px 2px rgba(0,0,0,0.5)' }}>ABCD</span>
                   )}
                   {effect.id === 'outline' && (
-                    <span style={{ WebkitTextStroke: '1px black', color: 'transparent' }}>Outline</span>
+                    <span style={{ WebkitTextStroke: '0.5px black', color: 'transparent' }}>ABCD</span>
                   )}
                 </div>
               </button>
@@ -395,7 +379,7 @@ export default function TextStylePanel({ canvasRef, selectedObject, tshirtColor 
                 placeholder="Search fonts..."
                 value={searchFont}
                 onChange={(e) => setSearchFont(e.target.value)}
-                className="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-black"
               />
               <svg
                 className="absolute left-3 top-2.5 w-4 h-4 text-gray-400"
@@ -414,7 +398,7 @@ export default function TextStylePanel({ canvasRef, selectedObject, tshirtColor 
           </div>
 
           {/* Category Tabs */}
-          <div className="flex gap-2 mb-3 overflow-x-auto">
+          <div className="flex gap-2 mb-3 overflow-x-auto scrollbar-hide">
             {Object.keys(FONT_CATEGORIES).map((category) => {
               const displayName = category === 'sansSerif'
                 ? 'Sans Serif'
@@ -426,7 +410,7 @@ export default function TextStylePanel({ canvasRef, selectedObject, tshirtColor 
                   onClick={() => setSelectedCategory(category)}
                   className={`px-3 py-1.5 text-xs font-medium rounded-full whitespace-nowrap transition-colors ${
                     selectedCategory === category
-                      ? 'bg-blue-500 text-white'
+                      ? 'bg-black text-white'
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                   }`}
                 >
@@ -452,7 +436,7 @@ export default function TextStylePanel({ canvasRef, selectedObject, tshirtColor 
                   }}
                   className={`w-full px-3 py-2 text-left rounded-lg transition-colors ${
                     fontFamily === font
-                      ? 'bg-blue-50 text-blue-700 font-medium'
+                      ? 'bg-gray-100 text-black font-medium'
                       : 'hover:bg-gray-50 text-gray-700'
                   }`}
                   style={{ fontFamily: font }}
@@ -464,218 +448,7 @@ export default function TextStylePanel({ canvasRef, selectedObject, tshirtColor 
           </div>
         </div>
 
-        {/* Text Properties */}
-        <div className="p-4 border-b border-gray-100">
-          <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Style</h4>
-
-          {/* Font Size */}
-          <div className="mb-4">
-            <label className="block text-xs font-medium text-gray-700 mb-2">
-              Font Size: {fontSize}px
-            </label>
-            <div className="flex items-center gap-2">
-              <input
-                type="range"
-                min="12"
-                max="200"
-                value={fontSize}
-                onChange={(e) => {
-                  const size = parseInt(e.target.value);
-                  setFontSize(size);
-                  updateSelectedText('fontSize', size);
-                }}
-                className="flex-1"
-              />
-              <input
-                type="number"
-                value={fontSize}
-                onChange={(e) => {
-                  const size = parseInt(e.target.value) || 12;
-                  setFontSize(size);
-                  updateSelectedText('fontSize', size);
-                }}
-                className="w-16 px-2 py-1 border border-gray-300 rounded text-sm"
-              />
-            </div>
-          </div>
-
-          {/* Color Picker */}
-          <div className="mb-4">
-            <label className="block text-xs font-medium text-gray-700 mb-2">
-              Text Color
-            </label>
-            <div className="flex items-center gap-2">
-              <input
-                type="color"
-                value={textColor}
-                onChange={(e) => {
-                  setTextColor(e.target.value);
-                  updateSelectedText('fill', e.target.value);
-                }}
-                className="w-12 h-10 rounded border border-gray-300 cursor-pointer"
-              />
-              <input
-                type="text"
-                value={textColor}
-                onChange={(e) => {
-                  setTextColor(e.target.value);
-                  updateSelectedText('fill', e.target.value);
-                }}
-                className="flex-1 px-3 py-2 border border-gray-300 rounded text-sm font-mono"
-                placeholder="#000000"
-              />
-            </div>
-          </div>
-
-          {/* Font Weight & Style */}
-          <div className="grid grid-cols-2 gap-2 mb-4">
-            <div>
-              <label className="block text-xs font-medium text-gray-700 mb-2">Weight</label>
-              <select
-                value={fontWeight}
-                onChange={(e) => {
-                  setFontWeight(e.target.value);
-                  updateSelectedText('fontWeight', e.target.value);
-                }}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
-              >
-                <option value="normal">Normal</option>
-                <option value="bold">Bold</option>
-                <option value="100">Thin</option>
-                <option value="300">Light</option>
-                <option value="500">Medium</option>
-                <option value="700">Bold</option>
-                <option value="900">Black</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-gray-700 mb-2">Style</label>
-              <select
-                value={fontStyle}
-                onChange={(e) => {
-                  setFontStyle(e.target.value);
-                  updateSelectedText('fontStyle', e.target.value);
-                }}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
-              >
-                <option value="normal">Normal</option>
-                <option value="italic">Italic</option>
-              </select>
-            </div>
-          </div>
-
-          {/* Text Alignment */}
-          <div className="mb-4">
-            <label className="block text-xs font-medium text-gray-700 mb-2">Alignment</label>
-            <div className="grid grid-cols-4 gap-2">
-              {['left', 'center', 'right', 'justify'].map((align) => (
-                <button
-                  key={align}
-                  onClick={() => {
-                    setTextAlign(align);
-                    updateSelectedText('textAlign', align);
-                  }}
-                  className={`p-2 rounded border-2 transition-all ${
-                    textAlign === align
-                      ? 'border-blue-500 bg-blue-50'
-                      : 'border-gray-200 hover:border-gray-300'
-                  }`}
-                  title={align.charAt(0).toUpperCase() + align.slice(1)}
-                >
-                  <svg className="w-4 h-4 mx-auto" fill="currentColor" viewBox="0 0 24 24">
-                    {align === 'left' && (
-                      <path d="M3 6h18v2H3V6zm0 5h12v2H3v-2zm0 5h18v2H3v-2z" />
-                    )}
-                    {align === 'center' && (
-                      <path d="M3 6h18v2H3V6zm3 5h12v2H6v-2zm-3 5h18v2H3v-2z" />
-                    )}
-                    {align === 'right' && (
-                      <path d="M3 6h18v2H3V6zm6 5h12v2H9v-2zm-6 5h18v2H3v-2z" />
-                    )}
-                    {align === 'justify' && (
-                      <path d="M3 6h18v2H3V6zm0 5h18v2H3v-2zm0 5h18v2H3v-2z" />
-                    )}
-                  </svg>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Circle/Curve Radius - Only show for circular and curved effects */}
-          {(textEffect === 'circle' || textEffect === 'curved' || textEffect === 'arch') && (
-            <div className="mb-4">
-              <label className="block text-xs font-medium text-gray-700 mb-2">
-                Curve Radius: {circleRadius}px
-              </label>
-              <input
-                type="range"
-                min="50"
-                max="250"
-                value={circleRadius}
-                onChange={(e) => setCircleRadius(parseInt(e.target.value))}
-                className="w-full"
-              />
-            </div>
-          )}
-
-          {/* Letter Spacing */}
-          <div className="mb-4">
-            <label className="block text-xs font-medium text-gray-700 mb-2">
-              Letter Spacing: {letterSpacing}
-            </label>
-            <input
-              type="range"
-              min="-5"
-              max="50"
-              step="0.5"
-              value={letterSpacing}
-              onChange={(e) => {
-                const spacing = parseFloat(e.target.value);
-                setLetterSpacing(spacing);
-                updateSelectedText('charSpacing', spacing * 10);
-              }}
-              className="w-full"
-            />
-          </div>
-
-          {/* Rotation */}
-          <div className="mb-4">
-            <label className="block text-xs font-medium text-gray-700 mb-2">
-              Rotation: {selectedObject?.angle?.toFixed(0) || 0}°
-            </label>
-            <input
-              type="range"
-              min="0"
-              max="360"
-              value={selectedObject?.angle || 0}
-              onChange={(e) => {
-                const angle = parseInt(e.target.value);
-                updateSelectedObject('angle', angle);
-              }}
-              className="w-full"
-            />
-          </div>
-
-          {/* Line Height */}
-          <div className="mb-4">
-            <label className="block text-xs font-medium text-gray-700 mb-2">
-              Line Height: {lineHeight.toFixed(1)}
-            </label>
-            <input
-              type="range"
-              min="0.5"
-              max="3"
-              step="0.1"
-              value={lineHeight}
-              onChange={(e) => {
-                const height = parseFloat(e.target.value);
-                setLineHeight(height);
-                updateSelectedText('lineHeight', height);
-              }}
-              className="w-full"
-            />
-          </div>
-        </div>
+        {/* Text styling now in right properties panel */}
 
         {/* Tips - Minimal */}
         <div className="p-4">

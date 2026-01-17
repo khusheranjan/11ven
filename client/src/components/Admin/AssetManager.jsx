@@ -98,7 +98,7 @@ export default function AssetManager() {
               required
               value={newAsset.name}
               onChange={(e) => setNewAsset({ ...newAsset, name: e.target.value })}
-              className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-black"
             />
           </div>
           <div>
@@ -106,7 +106,7 @@ export default function AssetManager() {
             <select
               value={newAsset.category}
               onChange={(e) => setNewAsset({ ...newAsset, category: e.target.value })}
-              className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-black"
             >
               {categories.map((cat) => (
                 <option key={cat.id} value={cat.id}>{cat.name}</option>
@@ -120,7 +120,7 @@ export default function AssetManager() {
               value={newAsset.tags}
               onChange={(e) => setNewAsset({ ...newAsset, tags: e.target.value })}
               placeholder="funny, motivational, cool"
-              className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-black"
             />
           </div>
           <div>
@@ -137,7 +137,7 @@ export default function AssetManager() {
             <button
               type="submit"
               disabled={uploading}
-              className="px-6 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 disabled:opacity-50"
+              className="px-6 py-2 bg-black text-white rounded hover:bg-gray-800 disabled:opacity-50"
             >
               {uploading ? 'Uploading...' : 'Upload Asset'}
             </button>
@@ -149,7 +149,7 @@ export default function AssetManager() {
       <div className="mb-4 flex gap-2">
         <button
           onClick={() => setSelectedCategory('')}
-          className={`px-3 py-1 rounded ${!selectedCategory ? 'bg-indigo-600 text-white' : 'bg-gray-200'}`}
+          className={`px-3 py-1 rounded ${!selectedCategory ? 'bg-black text-white' : 'bg-gray-200'}`}
         >
           All
         </button>
@@ -157,7 +157,7 @@ export default function AssetManager() {
           <button
             key={cat.id}
             onClick={() => setSelectedCategory(cat.id)}
-            className={`px-3 py-1 rounded ${selectedCategory === cat.id ? 'bg-indigo-600 text-white' : 'bg-gray-200'}`}
+            className={`px-3 py-1 rounded ${selectedCategory === cat.id ? 'bg-black text-white' : 'bg-gray-200'}`}
           >
             {cat.icon} {cat.name}
           </button>

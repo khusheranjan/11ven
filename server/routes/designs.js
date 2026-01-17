@@ -29,30 +29,42 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage, limits: { fileSize: 10 * 1024 * 1024 } });
 
+// Helper function to save base64 image to file
+const saveBase64Image = (base64Data, prefix) => {
+  if (!base64Data) return null;
+  const buffer = Buffer.from(base64Data.split(',')[1], 'base64');
+  const filename = `${prefix}-${Date.now()}-${Math.round(Math.random() * 1E9)}.png`;
+  const filepath = path.join(__dirname, '../uploads/designs', filename);
+  fs.mkdirSync(path.dirname(filepath), { recursive: true });
+  fs.writeFileSync(filepath, buffer);
+  return `/uploads/designs/${filename}`;
+};
+
 // Save design
 router.post('/', auth, async (req, res) => {
   try {
-    const { canvasJSON, name, tshirtColor, side, mockupData, printData } = req.body;
+    const {
+      canvasJSON,
+      name,
+      tshirtColor,
+      side,
+      mockupData,
+      printData,
+      // New fields for front/back support
+      frontMockupData,
+      frontPrintData,
+      backMockupData,
+      backPrintData,
+      hasBackDesign
+    } = req.body;
 
     // Save base64 images as files
-    let mockupUrl, printFileUrl;
-
-    if (mockupData) {
-      const mockupBuffer = Buffer.from(mockupData.split(',')[1], 'base64');
-      const mockupFilename = `mockup-${Date.now()}.png`;
-      const mockupPath = path.join(__dirname, '../uploads/designs', mockupFilename);
-      fs.mkdirSync(path.dirname(mockupPath), { recursive: true });
-      fs.writeFileSync(mockupPath, mockupBuffer);
-      mockupUrl = `/uploads/designs/${mockupFilename}`;
-    }
-
-    if (printData) {
-      const printBuffer = Buffer.from(printData.split(',')[1], 'base64');
-      const printFilename = `print-${Date.now()}.png`;
-      const printPath = path.join(__dirname, '../uploads/designs', printFilename);
-      fs.writeFileSync(printPath, printBuffer);
-      printFileUrl = `/uploads/designs/${printFilename}`;
-    }
+    const mockupUrl = saveBase64Image(mockupData, 'mockup');
+    const printFileUrl = saveBase64Image(printData, 'print');
+    const frontMockupUrl = saveBase64Image(frontMockupData, 'front-mockup');
+    const frontPrintFileUrl = saveBase64Image(frontPrintData, 'front-print');
+    const backMockupUrl = saveBase64Image(backMockupData, 'back-mockup');
+    const backPrintFileUrl = saveBase64Image(backPrintData, 'back-print');
 
     const design = new Design({
       userId: req.user._id,
@@ -60,8 +72,13 @@ router.post('/', auth, async (req, res) => {
       name: name || 'Untitled Design',
       tshirtColor,
       side,
-      mockupUrl,
-      printFileUrl
+      mockupUrl: mockupUrl || frontMockupUrl, // Backward compatibility
+      printFileUrl: printFileUrl || frontPrintFileUrl,
+      frontMockupUrl,
+      frontPrintFileUrl,
+      backMockupUrl,
+      backPrintFileUrl,
+      hasBackDesign: hasBackDesign || false
     });
 
     await design.save();

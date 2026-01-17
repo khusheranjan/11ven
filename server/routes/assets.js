@@ -65,12 +65,12 @@ router.get('/', async (req, res) => {
 // Get asset categories
 router.get('/categories', (req, res) => {
   res.json([
-    { id: 'quotes', name: 'Quotes & Text', icon: '💬' },
-    { id: 'icons', name: 'Icons & Symbols', icon: '⭐' },
-    { id: 'patterns', name: 'Patterns & Textures', icon: '🎨' },
-    { id: 'borders', name: 'Borders & Frames', icon: '🖼️' },
-    { id: 'characters', name: 'Characters', icon: '👤' },
-    { id: 'seasonal', name: 'Seasonal/Trending', icon: '🎄' }
+    { id: 'quotes', name: 'Quotes & Text', icon: '' },
+    { id: 'icons', name: 'Icons & Symbols', icon: '' },
+    { id: 'patterns', name: 'Patterns & Textures', icon: '' },
+    { id: 'borders', name: 'Borders & Frames', icon: '' },
+    { id: 'characters', name: 'Characters', icon: '' },
+    { id: 'seasonal', name: 'Seasonal/Trending', icon: '' }
   ]);
 });
 

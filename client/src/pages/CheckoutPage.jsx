@@ -24,6 +24,7 @@ export default function CheckoutPage() {
     pincode: '',
     phone: ''
   });
+  const [previewSide, setPreviewSide] = useState('front');
 
   useEffect(() => {
     loadDesign();
@@ -129,25 +130,73 @@ export default function CheckoutPage() {
   const totalPrice = BASE_PRICE * quantity;
 
   return (
-    <div className="min-h-screen bg-gray-100 py-8">
+    <div className="min-h-screen bg-white py-8">
       <div className="max-w-4xl mx-auto px-4">
-        <h1 className="text-2xl font-bold text-gray-900 mb-6">Checkout</h1>
+        <h1 className="text-2xl font-bold text-black mb-6">Checkout</h1>
 
         <div className="grid grid-cols-2 gap-6">
           {/* Order Summary */}
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="bg-gray-50 rounded-lg border border-gray-200 p-6">
             <h2 className="text-lg font-semibold mb-4">Order Summary</h2>
 
-            {/* Design Preview */}
-            {design?.mockupUrl && (
-              <div className="mb-4">
-                <img
-                  src={design.mockupUrl}
-                  alt="Design preview"
-                  className="w-full max-w-xs mx-auto border rounded"
-                />
-              </div>
-            )}
+            {/* Design Preview - Front and Back */}
+            <div className="mb-4">
+              {/* Check if design has both front and back */}
+              {design?.hasBackDesign && design?.frontMockupUrl && design?.backMockupUrl ? (
+                <div className="space-y-3">
+                  {/* Current preview */}
+                  <div className="relative">
+                    <img
+                      src={previewSide === 'front' ? design.frontMockupUrl : design.backMockupUrl}
+                      alt={`${previewSide} design preview`}
+                      className="w-full max-w-xs mx-auto border rounded-lg shadow-sm"
+                    />
+                  </div>
+
+                  {/* Side indicator */}
+                  <p className="text-center text-sm text-gray-500 font-medium">
+                    {previewSide === 'front' ? 'Front Design' : 'Back Design'}
+                  </p>
+
+                  {/* Both previews side by side (smaller) */}
+                  <div className="flex justify-center gap-3 mt-3">
+                    <div
+                      onClick={() => setPreviewSide('front')}
+                      className={`cursor-pointer rounded-lg border-2 transition-colors ${
+                        previewSide === 'front' ? 'border-black' : 'border-gray-200 hover:border-gray-300'
+                      }`}
+                    >
+                      <img
+                        src={design.frontMockupUrl}
+                        alt="Front thumbnail"
+                        className="w-20 h-20 object-cover rounded-md"
+                      />
+                    </div>
+                    <div
+                      onClick={() => setPreviewSide('back')}
+                      className={`cursor-pointer rounded-lg border-2 transition-colors ${
+                        previewSide === 'back' ? 'border-black' : 'border-gray-200 hover:border-gray-300'
+                      }`}
+                    >
+                      <img
+                        src={design.backMockupUrl}
+                        alt="Back thumbnail"
+                        className="w-20 h-20 object-cover rounded-md"
+                      />
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                /* Single mockup (legacy or front-only design) */
+                design?.mockupUrl && (
+                  <img
+                    src={design.frontMockupUrl || design.mockupUrl}
+                    alt="Design preview"
+                    className="w-full max-w-xs mx-auto border rounded-lg shadow-sm"
+                  />
+                )
+              )}
+            </div>
 
             {/* T-shirt Color */}
             <div className="mb-4">
@@ -160,14 +209,14 @@ export default function CheckoutPage() {
 
             {/* Size */}
             <div className="mb-4">
-              <label className="block text-gray-600 mb-2">Size:</label>
+              <label className="block text-gray-700 mb-2 font-medium">Size:</label>
               <div className="flex gap-2">
                 {SIZES.map((s) => (
                   <button
                     key={s}
                     onClick={() => setSize(s)}
-                    className={`px-4 py-2 border rounded ${
-                      size === s ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white hover:border-indigo-500'
+                    className={`px-4 py-2 border rounded transition-colors ${
+                      size === s ? 'bg-black text-white border-black' : 'bg-white border-gray-300 hover:border-black'
                     }`}
                   >
                     {s}
@@ -178,18 +227,18 @@ export default function CheckoutPage() {
 
             {/* Quantity */}
             <div className="mb-4">
-              <label className="block text-gray-600 mb-2">Quantity:</label>
+              <label className="block text-gray-700 mb-2 font-medium">Quantity:</label>
               <div className="flex items-center gap-3">
                 <button
                   onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                  className="w-10 h-10 border rounded text-xl"
+                  className="w-10 h-10 border border-gray-300 rounded text-xl hover:bg-gray-100"
                 >
                   -
                 </button>
                 <span className="text-xl font-semibold">{quantity}</span>
                 <button
                   onClick={() => setQuantity(quantity + 1)}
-                  className="w-10 h-10 border rounded text-xl"
+                  className="w-10 h-10 border border-gray-300 rounded text-xl hover:bg-gray-100"
                 >
                   +
                 </button>
@@ -215,60 +264,60 @@ export default function CheckoutPage() {
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm text-gray-600 mb-1">Full Name</label>
+                <label className="block text-sm text-gray-700 mb-1 font-medium">Full Name</label>
                 <input
                   type="text"
                   value={address.name}
                   onChange={handleAddressChange('name')}
-                  className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-black"
                 />
               </div>
               <div>
-                <label className="block text-sm text-gray-600 mb-1">Street Address</label>
+                <label className="block text-sm text-gray-700 mb-1 font-medium">Street Address</label>
                 <input
                   type="text"
                   value={address.street}
                   onChange={handleAddressChange('street')}
-                  className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-black"
                 />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm text-gray-600 mb-1">City</label>
+                  <label className="block text-sm text-gray-700 mb-1 font-medium">City</label>
                   <input
                     type="text"
                     value={address.city}
                     onChange={handleAddressChange('city')}
-                    className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-black"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm text-gray-600 mb-1">State</label>
+                  <label className="block text-sm text-gray-700 mb-1 font-medium">State</label>
                   <input
                     type="text"
                     value={address.state}
                     onChange={handleAddressChange('state')}
-                    className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-black"
                   />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm text-gray-600 mb-1">Pincode</label>
+                  <label className="block text-sm text-gray-700 mb-1 font-medium">Pincode</label>
                   <input
                     type="text"
                     value={address.pincode}
                     onChange={handleAddressChange('pincode')}
-                    className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-black"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm text-gray-600 mb-1">Phone</label>
+                  <label className="block text-sm text-gray-700 mb-1 font-medium">Phone</label>
                   <input
                     type="text"
                     value={address.phone}
                     onChange={handleAddressChange('phone')}
-                    className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-black"
                   />
                 </div>
               </div>
@@ -277,7 +326,7 @@ export default function CheckoutPage() {
             <button
               onClick={handlePayment}
               disabled={processing}
-              className="w-full mt-6 px-6 py-3 bg-green-600 text-white text-lg font-semibold rounded-md hover:bg-green-700 disabled:opacity-50"
+              className="w-full mt-6 px-6 py-3 bg-black text-white text-lg font-semibold rounded-md hover:bg-gray-800 disabled:opacity-50"
             >
               {processing ? 'Processing...' : `Pay ₹${totalPrice}`}
             </button>

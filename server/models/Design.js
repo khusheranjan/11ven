@@ -10,10 +10,25 @@ const designSchema = new mongoose.Schema({
     type: String,
     default: 'Untitled Design'
   },
+  // Legacy single mockup (for backward compatibility)
   mockupUrl: {
     type: String
   },
   printFileUrl: {
+    type: String
+  },
+  // Front side mockup and print files
+  frontMockupUrl: {
+    type: String
+  },
+  frontPrintFileUrl: {
+    type: String
+  },
+  // Back side mockup and print files
+  backMockupUrl: {
+    type: String
+  },
+  backPrintFileUrl: {
     type: String
   },
   canvasJSON: {
@@ -23,6 +38,11 @@ const designSchema = new mongoose.Schema({
   tshirtColor: {
     type: String,
     default: '#ffffff'
+  },
+  // Flag to indicate if design has content on back
+  hasBackDesign: {
+    type: Boolean,
+    default: false
   },
   side: {
     type: String,

@@ -50,17 +50,15 @@ export default function AssetLibrary({ onSelectAsset }) {
   };
 
   return (
-    <div className="w-72 bg-white/95 backdrop-blur-sm border-r border-gray-100 h-screen flex flex-col">
+    <div className="w-72 bg-white border-r border-gray-200 h-screen flex flex-col">
       {/* Header */}
-      <div className="p-5 border-b border-gray-100">
-        <h2 className="text-lg font-bold text-gray-900 mb-4">Graphics</h2>
-
+      <div className="p-5 border-b border-gray-200">
         {/* Search */}
         <div className="relative mb-4">
           <input
             type="text"
             placeholder="Search graphics..."
-            className="w-full bg-gray-50 border border-gray-200 rounded-xl py-3 pl-10 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+            className="w-full bg-white border border-gray-300 rounded-xl py-3 pl-10 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-black/20 focus:border-black transition-all"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -71,7 +69,7 @@ export default function AssetLibrary({ onSelectAsset }) {
         <div className="relative">
           <button
             onClick={() => setDropdownOpen(!dropdownOpen)}
-            className="w-full flex items-center justify-between px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-100 transition-all"
+            className="w-full flex items-center justify-between px-4 py-3 bg-white border border-gray-300 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50 transition-all"
           >
             <span>{getSelectedCategoryName()}</span>
             <ChevronDown className={`w-4 h-4 transition-transform ${dropdownOpen ? 'rotate-180' : ''}`} />
@@ -86,7 +84,7 @@ export default function AssetLibrary({ onSelectAsset }) {
                 }}
                 className={`w-full text-left px-4 py-3 text-sm font-medium transition-colors ${
                   !selectedCategory
-                    ? 'bg-blue-50 text-blue-600'
+                    ? 'bg-black text-white'
                     : 'text-gray-700 hover:bg-gray-50'
                 }`}
               >
@@ -101,7 +99,7 @@ export default function AssetLibrary({ onSelectAsset }) {
                   }}
                   className={`w-full text-left px-4 py-3 text-sm font-medium transition-colors ${
                     selectedCategory === cat.id
-                      ? 'bg-blue-50 text-blue-600'
+                      ? 'bg-black text-white'
                       : 'text-gray-700 hover:bg-gray-50'
                   }`}
                 >
@@ -118,7 +116,7 @@ export default function AssetLibrary({ onSelectAsset }) {
       <div className="flex-1 overflow-y-auto scrollbar-hide p-6">
         {loading ? (
           <div className="flex flex-col items-center justify-center py-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-2 border-blue-500 border-t-transparent mb-3"></div>
+            <div className="animate-spin rounded-full h-8 w-8 border-2 border-black border-t-transparent mb-3"></div>
             <p className="text-sm text-gray-500">Loading graphics...</p>
           </div>
         ) : assets.length === 0 ? (
@@ -149,7 +147,7 @@ export default function AssetLibrary({ onSelectAsset }) {
               <button
                 key={asset._id}
                 onClick={() => onSelectAsset(asset)}
-                className="group aspect-square rounded-xl border border-gray-100 overflow-hidden hover:border-blue-300 hover:shadow-md transition-all bg-gray-50"
+                className="group aspect-square rounded-xl border border-gray-200 overflow-hidden hover:border-black hover:shadow-md transition-all bg-gray-50"
                 title={asset.name}
               >
                 <div className="w-full h-full flex items-center justify-center p-3">

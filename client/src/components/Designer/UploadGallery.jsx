@@ -212,44 +212,39 @@ export default function UploadGallery({ canvasRef }) {
                   </div>
                 </div>
 
-                {/* Action Buttons */}
-                <div className="p-2 space-y-1">
+                {/* Action Buttons - On one line */}
+                <div className="p-2 flex gap-1">
                   {/* Remove Background Button */}
                   {!upload.backgroundRemoved ? (
                     <button
                       onClick={() => handleRemoveBackground(upload._id)}
                       disabled={processingIds.has(upload._id)}
-                      className="w-full px-2 py-1.5 bg-purple-500 text-white text-xs font-medium rounded hover:bg-purple-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-1"
+                      className="flex-1 px-2 py-1.5 bg-purple-500 text-white text-xs font-medium rounded hover:bg-purple-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-1"
+                      title="Remove background"
                     >
                       {processingIds.has(upload._id) ? (
-                        <>
-                          <div className="inline-block h-3 w-3 animate-spin rounded-full border-2 border-solid border-white border-r-transparent"></div>
-                          <span>Processing...</span>
-                        </>
+                        <div className="inline-block h-3 w-3 animate-spin rounded-full border-2 border-solid border-white border-r-transparent"></div>
                       ) : (
-                        <>
-                          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
-                          </svg>
-                          <span>Remove BG</span>
-                        </>
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+                        </svg>
                       )}
                     </button>
                   ) : (
-                    <div className="w-full px-2 py-1.5 bg-green-50 text-green-700 text-xs font-medium rounded text-center">
-                      Background Removed
+                    <div className="flex-1 px-2 py-1.5 bg-green-50 text-green-700 text-xs font-medium rounded text-center">
+                      ✓ No BG
                     </div>
                   )}
 
                   {/* Delete Button */}
                   <button
                     onClick={() => handleDeleteUpload(upload._id)}
-                    className="w-full px-2 py-1.5 bg-red-50 text-red-600 text-xs font-medium rounded hover:bg-red-100 transition-colors flex items-center justify-center gap-1"
+                    className="flex-1 px-2 py-1.5 bg-red-50 text-red-600 text-xs font-medium rounded hover:bg-red-100 transition-colors flex items-center justify-center gap-1"
+                    title="Delete"
                   >
-                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                     </svg>
-                    <span>Delete</span>
                   </button>
                 </div>
 

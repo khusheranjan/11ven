@@ -39,16 +39,16 @@ export default function OrdersPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 py-8">
+    <div className="min-h-screen bg-white py-8">
       <div className="max-w-4xl mx-auto px-4">
-        <h1 className="text-2xl font-bold text-gray-900 mb-6">My Orders</h1>
+        <h1 className="text-2xl font-bold text-black mb-6">My Orders</h1>
 
         {orders.length === 0 ? (
-          <div className="bg-white rounded-lg shadow p-8 text-center">
+          <div className="bg-gray-50 rounded-lg border border-gray-200 p-8 text-center">
             <p className="text-gray-600 mb-4">You haven't placed any orders yet.</p>
             <Link
               to="/"
-              className="inline-block px-6 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+              className="inline-block px-6 py-2 bg-black text-white rounded-md hover:bg-gray-800"
             >
               Create Your First Design
             </Link>

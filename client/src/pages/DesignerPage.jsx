@@ -1,14 +1,14 @@
 import { useState, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import {
-  LayoutGrid, Type, Upload, ChevronRight,
-  ZoomIn, ZoomOut, Maximize, Eye
+  LayoutGrid, Type, Upload, ChevronRight, LogOut, Package, ShieldCheck
 } from 'lucide-react';
 import Canvas from '../components/Designer/Canvas';
 import AssetLibrary from '../components/Designer/AssetLibrary';
 import Toolbar from '../components/Designer/Toolbar';
 import PropertiesPanel from '../components/Designer/PropertiesPanel';
 import { saveDesign } from '../services/api';
+import { useAuth } from '../context/AuthContext';
 
 export default function DesignerPage() {
   const canvasRef = useRef(null);
@@ -21,6 +21,13 @@ export default function DesignerPage() {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const canvasContainerRef = useRef(null);
   const navigate = useNavigate();
+  const { user, logout, isAdmin } = useAuth();
+
+  // Redirect admin users away from designer
+  if (isAdmin) {
+    navigate('/admin', { replace: true });
+    return null;
+  }
 
   // Zoom functions
   const handleZoomIn = () => {
@@ -72,19 +79,33 @@ export default function DesignerPage() {
   const handleProceedToCheckout = async () => {
     if (!canvasRef.current) return;
 
-    const canvas = canvasRef.current.getCanvas();
-    if (!canvas || canvas.getObjects().length === 0) {
+    const hasFront = canvasRef.current.hasSideContent('front');
+    const hasBack = canvasRef.current.hasBackContent();
+
+    if (!hasFront && !hasBack) {
       alert('Please add at least one element to your design');
       return;
     }
 
     setSaving(true);
     try {
+      // Get canvas JSON (contains both front and back)
+      const canvasJSON = canvasRef.current.getCanvasJSON();
+
+      // Export mockups for both sides
+      const frontMockupData = await canvasRef.current.exportSideMockup('front');
+      const backMockupData = hasBack ? await canvasRef.current.exportSideMockup('back') : null;
+
       const design = await saveDesign({
-        canvasJSON: canvasRef.current.getCanvasJSON(),
+        canvasJSON,
         tshirtColor,
-        mockupData: canvasRef.current.exportMockup(),
-        printData: canvasRef.current.exportPrint()
+        // Legacy fields for backward compatibility
+        mockupData: frontMockupData,
+        printData: canvasRef.current.exportPrint(),
+        // New front/back fields
+        frontMockupData,
+        backMockupData,
+        hasBackDesign: hasBack
       });
       navigate(`/checkout/${design.data._id}`);
     } catch (err) {
@@ -96,9 +117,9 @@ export default function DesignerPage() {
   };
 
   const tools = [
-    { id: 'graphics', icon: LayoutGrid, label: 'ART' },
-    { id: 'text', icon: Type, label: 'TEXT' },
-    { id: 'upload', icon: Upload, label: 'UPLOAD' },
+    { id: 'graphics', icon: LayoutGrid, label: '' },
+    { id: 'text', icon: Type, label: '' },
+    { id: 'upload', icon: Upload, label: '' },
   ];
 
   const colors = [
@@ -113,25 +134,28 @@ export default function DesignerPage() {
   ];
 
   return (
-    <div className="flex h-screen overflow-hidden text-gray-900 antialiased bg-slate-50">
+    <div className="flex h-screen overflow-hidden text-gray-900 antialiased bg-white">
       {/* Sidebar - Fixed width with equal size tabs */}
-      <aside className="w-20 bg-white/80 backdrop-blur-sm border-r border-gray-100 flex flex-col items-center py-6 space-y-4 h-screen overflow-y-auto">
-        {tools.map((tool) => (
-          <button
-            key={tool.id}
-            onClick={() => setActiveTool(tool.id)}
-            className={`w-16 h-16 flex flex-col items-center justify-center group transition-all duration-200 ${
-              activeTool === tool.id ? 'text-blue-600' : 'text-gray-400 hover:text-gray-600'
-            }`}
-          >
-            <div className={`p-3 rounded-xl mb-1 transition-all ${
-              activeTool === tool.id ? 'bg-blue-50' : 'group-hover:bg-gray-50'
-            }`}>
-              <tool.icon className="w-6 h-6" />
-            </div>
-            <span className="text-[10px] font-bold tracking-wider">{tool.label}</span>
-          </button>
-        ))}
+      <aside className="w-20 bg-white border-r border-gray-200 flex flex-col items-center py-4 h-screen overflow-y-auto">
+        {/* Tool Buttons */}
+        <div className="space-y-2">
+          {tools.map((tool) => (
+            <button
+              key={tool.id}
+              onClick={() => setActiveTool(tool.id)}
+              className={`w-16 h-16 flex flex-col items-center justify-center group transition-all duration-200 ${
+                activeTool === tool.id ? 'text-black' : 'text-gray-400 hover:text-gray-600'
+              }`}
+            >
+              <div className={`p-3 rounded-xl mb-1 transition-all ${
+                activeTool === tool.id ? 'bg-gray-100' : 'group-hover:bg-gray-50'
+              }`}>
+                <tool.icon className="w-6 h-6" />
+              </div>
+              <span className="text-[10px] font-bold tracking-wider">{tool.label}</span>
+            </button>
+          ))}
+        </div>
       </aside>
 
       {/* Tool Panel */}
@@ -140,10 +164,7 @@ export default function DesignerPage() {
           <AssetLibrary onSelectAsset={handleSelectAsset} />
         )}
         {activeTool === 'text' && (
-          <div className="w-72 bg-white/95 backdrop-blur-sm border-r border-gray-100 h-screen flex flex-col">
-            <div className="p-5 border-b border-gray-100">
-              <h2 className="text-lg font-bold text-gray-900">Text</h2>
-            </div>
+          <div className="w-72 bg-white border-r border-gray-200 h-screen flex flex-col">
             <div className="flex-1 overflow-hidden">
               <Toolbar
                 canvasRef={canvasRef}
@@ -155,10 +176,7 @@ export default function DesignerPage() {
           </div>
         )}
         {activeTool === 'upload' && (
-          <div className="w-72 bg-white/95 backdrop-blur-sm border-r border-gray-100 h-screen flex flex-col">
-            <div className="p-5 border-b border-gray-100">
-              <h2 className="text-lg font-bold text-gray-900">Upload</h2>
-            </div>
+          <div className="w-72 bg-white border-r border-gray-200 h-screen flex flex-col">
             <div className="flex-1 overflow-hidden">
               <Toolbar canvasRef={canvasRef} showOnlyUpload={true} />
             </div>
@@ -166,8 +184,8 @@ export default function DesignerPage() {
         )}
       </div>
 
-      {/* Canvas Area */}
-      <div className="flex-1 flex flex-col bg-slate-50 relative overflow-hidden" ref={canvasContainerRef}>
+      {/* Canvas Area with Right Sidebar */}
+      <div className="flex-1 flex flex-col bg-white relative overflow-hidden" ref={canvasContainerRef}>
         {/* Top Controls */}
         <div className="p-6 flex items-center justify-between z-10">
           <div>
@@ -177,11 +195,11 @@ export default function DesignerPage() {
 
           <div className="flex items-center space-x-6">
             {/* Front/Back Toggle */}
-            <div className="bg-white p-1 rounded-xl shadow-sm border border-gray-100 flex">
+            <div className="bg-white p-1 rounded-xl border border-gray-200 flex">
               <button
                 onClick={() => handleSideChange('front')}
                 className={`px-5 py-2 text-sm font-bold rounded-lg transition-all ${
-                  side === 'front' ? 'bg-gray-100 text-gray-900 shadow-sm' : 'text-gray-400 hover:text-gray-600'
+                  side === 'front' ? 'bg-black text-white' : 'text-gray-400 hover:text-gray-600'
                 }`}
               >
                 Front
@@ -189,7 +207,7 @@ export default function DesignerPage() {
               <button
                 onClick={() => handleSideChange('back')}
                 className={`px-5 py-2 text-sm font-bold rounded-lg transition-all ${
-                  side === 'back' ? 'bg-gray-100 text-gray-900 shadow-sm' : 'text-gray-400 hover:text-gray-600'
+                  side === 'back' ? 'bg-black text-white' : 'text-gray-400 hover:text-gray-600'
                 }`}
               >
                 Back
@@ -215,7 +233,7 @@ export default function DesignerPage() {
             <button
               onClick={handleProceedToCheckout}
               disabled={saving}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-full text-sm font-semibold transition-all flex items-center shadow-md disabled:opacity-50"
+              className="bg-black hover:bg-gray-800 text-white px-6 py-2 rounded-full text-sm font-semibold transition-all flex items-center disabled:opacity-50"
             >
               {saving ? 'Saving...' : 'Checkout'}
               <ChevronRight className="w-4 h-4 ml-1" />
@@ -223,61 +241,32 @@ export default function DesignerPage() {
           </div>
         </div>
 
-        {/* Canvas with Dot Grid Background */}
-        <div className="flex-1 dot-grid relative flex items-center justify-center">
-          <div className="relative w-full max-w-2xl px-12">
-            <Canvas
-              ref={canvasRef}
-              tshirtColor={tshirtColor}
-              setTshirtColor={setTshirtColor}
-              onSelectionChange={setSelectedObject}
-              side={side}
-              onSideChange={handleSideChange}
-              hideControls={true}
-            />
+        {/* Main Content Area with Canvas and Properties */}
+        <div className="flex-1 flex overflow-hidden">
+          {/* Canvas with Dot Grid Background */}
+          <div className="flex-1 dot-grid relative flex items-center justify-center p-8">
+            <div className="relative flex items-center justify-center">
+              <Canvas
+                ref={canvasRef}
+                tshirtColor={tshirtColor}
+                onSelectionChange={setSelectedObject}
+                side={side}
+                zoomLevel={zoomLevel}
+              />
+            </div>
           </div>
 
-          {/* Floating Zoom Controls */}
-          <div className="absolute right-8 top-1/2 -translate-y-1/2 flex flex-col space-y-3">
-            <button
-              onClick={handleZoomIn}
-              className="p-3 bg-white rounded-xl shadow-lg border border-gray-100 hover:bg-gray-50 transition-all text-gray-500 hover:text-blue-600"
-              title="Zoom In"
-            >
-              <ZoomIn className="w-5 h-5" />
-            </button>
-            <button
-              onClick={handleZoomOut}
-              className="p-3 bg-white rounded-xl shadow-lg border border-gray-100 hover:bg-gray-50 transition-all text-gray-500 hover:text-blue-600"
-              title="Zoom Out"
-            >
-              <ZoomOut className="w-5 h-5" />
-            </button>
-            <button
-              onClick={handleFullscreen}
-              className="p-3 bg-white rounded-xl shadow-lg border border-gray-100 hover:bg-gray-50 transition-all text-gray-500 hover:text-blue-600"
-              title="Fullscreen"
-            >
-              <Maximize className="w-5 h-5" />
-            </button>
-          </div>
-
-          {/* Bottom Preview Button Only */}
-          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex items-center bg-white/90 backdrop-blur px-2 py-2 rounded-2xl shadow-xl border border-gray-100">
-            <button className="flex items-center space-x-2 px-6 py-3 hover:bg-gray-100 rounded-xl transition-all group">
-              <Eye className="w-4 h-4 text-gray-400 group-hover:text-blue-600" />
-              <span className="text-xs font-bold text-gray-700 uppercase tracking-widest">Preview</span>
-            </button>
-          </div>
+          {/* Right Properties Panel - Always visible */}
+          <PropertiesPanel
+            selectedObject={selectedObject}
+            canvasRef={canvasRef}
+            onDelete={() => setSelectedObject(null)}
+            onZoomIn={handleZoomIn}
+            onZoomOut={handleZoomOut}
+            onFullscreen={handleFullscreen}
+          />
         </div>
       </div>
-
-      {/* Right Properties Panel */}
-      <PropertiesPanel
-        selectedObject={selectedObject}
-        canvasRef={canvasRef}
-        onDelete={() => setSelectedObject(null)}
-      />
     </div>
   );
 }
