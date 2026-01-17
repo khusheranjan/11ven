@@ -12,12 +12,16 @@ const TSHIRT_COLORS = [
   { name: 'Pink', value: '#ec4899', hex: '#EC4899', frontImage: '/tshirt-pink-front.png', backImage: '/tshirt-pink-back.png' },
 ];
 
-const Canvas = forwardRef(({ onCanvasReady, tshirtColor, setTshirtColor, onSelectionChange }, ref) => {
+const Canvas = forwardRef(({ onCanvasReady, tshirtColor, setTshirtColor, onSelectionChange, side: externalSide, onSideChange, hideControls = false }, ref) => {
   const canvasRef = useRef(null);
   const fabricRef = useRef(null);
-  const [side, setSide] = useState('front');
+  const [internalSide, setInternalSide] = useState('front');
   const [frontDesign, setFrontDesign] = useState(null);
   const [backDesign, setBackDesign] = useState(null);
+
+  // Use external side if provided, otherwise use internal
+  const side = externalSide !== undefined ? externalSide : internalSide;
+  const setSide = onSideChange || setInternalSide;
 
   useImperativeHandle(ref, () => ({
     addImage: (url) => {
@@ -130,7 +134,24 @@ const Canvas = forwardRef(({ onCanvasReady, tshirtColor, setTshirtColor, onSelec
         width: 400,
         height: 500,
         backgroundColor: 'transparent',
-        preserveObjectStacking: true
+        preserveObjectStacking: true,
+        // Modern selection styling
+        selectionColor: 'rgba(59, 130, 246, 0.1)',
+        selectionBorderColor: '#3b82f6',
+        selectionLineWidth: 1
+      });
+
+      // Customize default control styling for all objects
+      fabric.Object.prototype.set({
+        transparentCorners: false,
+        cornerColor: '#3b82f6',
+        cornerStrokeColor: '#ffffff',
+        cornerSize: 8,
+        cornerStyle: 'circle',
+        borderColor: '#3b82f6',
+        borderScaleFactor: 1.5,
+        padding: 8,
+        borderDashArray: [4, 4]
       });
 
       // Add selection change handler
@@ -183,53 +204,6 @@ const Canvas = forwardRef(({ onCanvasReady, tshirtColor, setTshirtColor, onSelec
 
   return (
     <div className="flex flex-col items-center w-full">
-      {/* Color and Side Selector */}
-      <div className="w-full mb-6 flex items-center justify-between">
-        {/* T-shirt color selector */}
-        <div className="flex items-center gap-3">
-          <span className="text-sm font-semibold text-gray-700">Color:</span>
-          <div className="flex gap-2">
-            {TSHIRT_COLORS.map((color) => (
-              <button
-                key={color.value}
-                onClick={() => setTshirtColor(color.value)}
-                className={`w-10 h-10 rounded-full border-2 transition-all ${
-                  tshirtColor === color.value
-                    ? 'border-blue-600 ring-2 ring-blue-200 scale-110'
-                    : 'border-gray-300 hover:border-gray-400'
-                }`}
-                style={{ backgroundColor: color.value }}
-                title={color.name}
-              />
-            ))}
-          </div>
-        </div>
-
-        {/* Front/Back toggle */}
-        <div className="flex bg-gray-100 rounded-lg p-1">
-          <button
-            onClick={() => handleSideChange('front')}
-            className={`px-6 py-2 rounded-md font-medium text-sm transition-all ${
-              side === 'front'
-                ? 'bg-white text-blue-600 shadow-sm'
-                : 'text-gray-600 hover:text-gray-900'
-            }`}
-          >
-            Front
-          </button>
-          <button
-            onClick={() => handleSideChange('back')}
-            className={`px-6 py-2 rounded-md font-medium text-sm transition-all ${
-              side === 'back'
-                ? 'bg-white text-blue-600 shadow-sm'
-                : 'text-gray-600 hover:text-gray-900'
-            }`}
-          >
-            Back
-          </button>
-        </div>
-      </div>
-
       {/* Canvas with T-shirt mockup */}
       <div className="relative bg-gradient-to-br from-gray-100 via-gray-50 to-white rounded-2xl shadow-2xl p-10">
         <div className="relative w-[400px] h-[500px] flex items-center justify-center">
@@ -263,26 +237,6 @@ const Canvas = forwardRef(({ onCanvasReady, tshirtColor, setTshirtColor, onSelec
               <canvas ref={canvasRef} className="relative" />
             </div>
           </div>
-        </div>
-      </div>
-
-      {/* Tips */}
-      <div className="mt-6 flex items-center gap-6 text-xs text-gray-600">
-        <div className="flex items-center gap-2">
-          <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-          <span>Click to select</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-          <span>Drag to move</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-          <span>Corners to resize</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
-          <span>Double-click text to edit</span>
         </div>
       </div>
     </div>

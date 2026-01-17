@@ -72,14 +72,14 @@ const FONT_CATEGORIES = {
   ]
 };
 
-// Text effect presets
+// Text effect presets with visual styling
 const TEXT_EFFECTS = [
-  { id: 'none', name: 'Normal', preview: 'Text' },
-  { id: 'curved', name: 'Curved', preview: '⌒Text⌒' },
-  { id: 'arch', name: 'Arch', preview: '⌢Text⌣' },
-  { id: 'circle', name: 'Circle', preview: '◯Text' },
-  { id: 'shadow', name: 'Shadow', preview: 'Text' },
-  { id: 'outline', name: 'Outline', preview: 'Text' }
+  { id: 'none', name: 'Normal' },
+  { id: 'curved', name: 'Curved' },
+  { id: 'arch', name: 'Arch' },
+  { id: 'circle', name: 'Circle' },
+  { id: 'shadow', name: 'Shadow' },
+  { id: 'outline', name: 'Outline' }
 ];
 
 export default function TextStylePanel({ canvasRef, selectedObject, tshirtColor }) {
@@ -305,51 +305,87 @@ export default function TextStylePanel({ canvasRef, selectedObject, tshirtColor 
 
   return (
     <div className="h-full flex flex-col">
-      {/* Add Text Section */}
-      <div className="p-4 border-b border-gray-200">
-        <label className="block text-sm font-medium text-gray-700 mb-2">Enter your text</label>
-        <textarea
-          placeholder="Type your text here..."
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm resize-none"
-          rows={3}
-          value={textInput}
-          onChange={(e) => setTextInput(e.target.value)}
-        />
-        <button
-          onClick={handleAddText}
-          disabled={!textInput.trim()}
-          className="w-full mt-3 px-4 py-2.5 bg-blue-500 text-white font-medium rounded-lg hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
-        >
-          Add Text
-        </button>
+      {/* Add Text Section - Compact */}
+      <div className="p-4 border-b border-gray-100">
+        <div className="flex gap-2">
+          <input
+            type="text"
+            placeholder="Enter text..."
+            className="flex-1 px-3 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+            value={textInput}
+            onChange={(e) => setTextInput(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && handleAddText()}
+          />
+          <button
+            onClick={handleAddText}
+            disabled={!textInput.trim()}
+            className="px-4 py-2.5 bg-blue-500 text-white font-medium rounded-lg hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors text-sm whitespace-nowrap"
+          >
+            Add
+          </button>
+        </div>
       </div>
 
-      {/* Scrollable Content */}
-      <div className="flex-1 overflow-y-auto">
-        {/* Text Effects */}
-        <div className="p-4 border-b border-gray-200">
-          <h4 className="text-sm font-semibold text-gray-900 mb-3">Text Effects</h4>
+      {/* Scrollable Content - Hidden scrollbar */}
+      <div className="flex-1 overflow-y-auto scrollbar-hide">
+        {/* Text Effects - Visually styled previews */}
+        <div className="p-4 border-b border-gray-100">
+          <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Effects</h4>
           <div className="grid grid-cols-3 gap-2">
             {TEXT_EFFECTS.map((effect) => (
               <button
                 key={effect.id}
                 onClick={() => setTextEffect(effect.id)}
-                className={`p-3 rounded-lg border-2 text-center transition-all ${
+                className={`p-3 rounded-lg border-2 text-center transition-all h-20 flex flex-col items-center justify-center ${
                   textEffect === effect.id
                     ? 'border-blue-500 bg-blue-50'
                     : 'border-gray-200 hover:border-gray-300'
                 }`}
               >
-                <div className="text-lg mb-1">{effect.preview}</div>
-                <div className="text-xs text-gray-600">{effect.name}</div>
+                {/* Visual effect preview */}
+                <div className="text-sm font-bold mb-1">
+                  {effect.id === 'none' && (
+                    <span>Normal</span>
+                  )}
+                  {effect.id === 'curved' && (
+                    <svg width="50" height="30" viewBox="0 0 50 30">
+                      <path id="curve1" d="M 5 25 Q 25 5 45 25" fill="none" />
+                      <text fontSize="8" fontWeight="bold" fill="currentColor">
+                        <textPath href="#curve1" startOffset="50%" textAnchor="middle">Curved</textPath>
+                      </text>
+                    </svg>
+                  )}
+                  {effect.id === 'arch' && (
+                    <svg width="50" height="30" viewBox="0 0 50 30">
+                      <path id="arch1" d="M 5 25 Q 25 0 45 25" fill="none" />
+                      <text fontSize="8" fontWeight="bold" fill="currentColor">
+                        <textPath href="#arch1" startOffset="50%" textAnchor="middle">Arch</textPath>
+                      </text>
+                    </svg>
+                  )}
+                  {effect.id === 'circle' && (
+                    <svg width="40" height="40" viewBox="0 0 40 40">
+                      <path id="circle1" d="M 20 5 A 15 15 0 1 1 19.99 5" fill="none" />
+                      <text fontSize="6" fontWeight="bold" fill="currentColor">
+                        <textPath href="#circle1" startOffset="0%">Circle</textPath>
+                      </text>
+                    </svg>
+                  )}
+                  {effect.id === 'shadow' && (
+                    <span style={{ textShadow: '2px 2px 3px rgba(0,0,0,0.4)' }}>Shadow</span>
+                  )}
+                  {effect.id === 'outline' && (
+                    <span style={{ WebkitTextStroke: '1px black', color: 'transparent' }}>Outline</span>
+                  )}
+                </div>
               </button>
             ))}
           </div>
         </div>
 
         {/* Font Family */}
-        <div className="p-4 border-b border-gray-200">
-          <h4 className="text-sm font-semibold text-gray-900 mb-3">Font Family</h4>
+        <div className="p-4 border-b border-gray-100">
+          <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Font</h4>
 
           {/* Search */}
           <div className="mb-3">
@@ -400,33 +436,37 @@ export default function TextStylePanel({ canvasRef, selectedObject, tshirtColor 
             })}
           </div>
 
-          {/* Font List */}
-          <div className="space-y-1 max-h-48 overflow-y-auto">
-            {getFilteredFonts().map((font) => (
-              <button
-                key={font}
-                onClick={() => {
-                  setFontFamily(font);
-                  loadFont(font);
-                  updateSelectedText('fontFamily', font);
-                }}
-                onMouseEnter={() => loadFont(font)}
-                className={`w-full px-3 py-2 text-left rounded-lg transition-colors ${
-                  fontFamily === font
-                    ? 'bg-blue-50 text-blue-700 font-medium'
-                    : 'hover:bg-gray-50 text-gray-700'
-                }`}
-                style={{ fontFamily: loadedFonts.has(font) ? font : 'Arial' }}
-              >
-                {font}
-              </button>
-            ))}
+          {/* Font List - Always show in actual font style */}
+          <div className="space-y-1 max-h-40 overflow-y-auto scrollbar-hide">
+            {getFilteredFonts().map((font) => {
+              // Load font immediately when it appears in the list
+              if (!loadedFonts.has(font)) {
+                loadFont(font);
+              }
+              return (
+                <button
+                  key={font}
+                  onClick={() => {
+                    setFontFamily(font);
+                    updateSelectedText('fontFamily', font);
+                  }}
+                  className={`w-full px-3 py-2 text-left rounded-lg transition-colors ${
+                    fontFamily === font
+                      ? 'bg-blue-50 text-blue-700 font-medium'
+                      : 'hover:bg-gray-50 text-gray-700'
+                  }`}
+                  style={{ fontFamily: font }}
+                >
+                  {font}
+                </button>
+              );
+            })}
           </div>
         </div>
 
         {/* Text Properties */}
-        <div className="p-4 border-b border-gray-200">
-          <h4 className="text-sm font-semibold text-gray-900 mb-3">Text Properties</h4>
+        <div className="p-4 border-b border-gray-100">
+          <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Style</h4>
 
           {/* Font Size */}
           <div className="mb-4">
@@ -637,17 +677,11 @@ export default function TextStylePanel({ canvasRef, selectedObject, tshirtColor 
           </div>
         </div>
 
-        {/* Tips */}
+        {/* Tips - Minimal */}
         <div className="p-4">
-          <div className="bg-blue-50 rounded-lg p-3">
-            <p className="text-xs font-medium text-blue-900 mb-2">Text Tips:</p>
-            <ul className="space-y-1 text-xs text-blue-700">
-              <li>• Double-click text on canvas to edit</li>
-              <li>• Drag corners to resize</li>
-              <li>• Select and press Delete to remove</li>
-              <li>• Use curved text for unique designs</li>
-            </ul>
-          </div>
+          <p className="text-[10px] text-gray-400 text-center">
+            Double-click text to edit • Press Delete to remove
+          </p>
         </div>
       </div>
     </div>
